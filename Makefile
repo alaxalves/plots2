@@ -43,7 +43,7 @@ install-dev:
 	bundle install --without production mysql
 	echo "Installing yarn Packages"
 	yarn install
-	echo "Copying example configuartions"
+	echo "Copying example configurations"
 	cp db/schema.rb.example db/schema.rb
 	cp config/database.yml.sqlite.example config/database.yml
 	echo "Setting up the database"

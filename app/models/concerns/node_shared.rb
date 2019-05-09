@@ -17,14 +17,19 @@ module NodeShared
     end
   end
 
+  def verify_tagname(tagname)
+    tagname = Regexp.last_match(2)
+    exclude = nil
+    if tagname.include?('!')
+      exclude = tagname.split('!') - [tagname.split('!').first]
+      tagname = tagname.split('!').first
+    end
+    return tagname, exclude
+  end
+
   def self.notes_thumbnail_grid(body, _page = 1)
     body.gsub(/(?<![\>`])(\<p\>)?\[notes\:grid\:(\S+)\]/) do |_tagname|
-      tagname = Regexp.last_match(2)
-      exclude = nil
-      if tagname.include?('!')
-        exclude = tagname.split('!') - [tagname.split('!').first]
-        tagname = tagname.split('!').first
-      end
+      verify_tagname(tagname)
 
       nodes = Node.where(status: 1, type: 'note')
                   .includes(:revision, :tag)
@@ -76,12 +81,7 @@ module NodeShared
   # rubular regex: http://rubular.com/r/hBEThNL4qd
   def self.notes_grid(body, _page = 1)
     body.gsub(/(?<![\>`])(\<p\>)?\[notes\:(\S+)\]/) do |_tagname|
-      tagname = Regexp.last_match(2)
-      exclude = nil
-      if tagname.include?('!')
-        exclude = tagname.split('!') - [tagname.split('!').first]
-        tagname = tagname.split('!').first
-      end
+      verify_tagname(tagname)
 
       nodes = Node.where(status: 1, type: 'note')
                   .includes(:revision, :tag)
@@ -114,12 +114,7 @@ module NodeShared
 
   def self.nodes_grid(body, _page = 1)
     body.gsub(/(?<![\>`])(\<p\>)?\[nodes\:(\S+)\]/) do |_tagname|
-      tagname = Regexp.last_match(2)
-      exclude = nil
-      if tagname.include?('!')
-        exclude = tagname.split('!') - [tagname.split('!').first]
-        tagname = tagname.split('!').first
-      end
+      verify_tagname(tagname)
 
       nodes = Node.where(status: 1).where("node.type = 'page' OR node.type = 'note'")
                   .includes(:revision, :tag)
@@ -153,12 +148,9 @@ module NodeShared
   # rubular regex: http://rubular.com/r/hBEThNL4qd
   def self.questions_grid(body, _page = 1)
     body.gsub(/(?<![\>`])(\<p\>)?\[questions\:(\S+)\]/) do |_tagname|
-      tagname = Regexp.last_match(2)
-      exclude = nil
-      if tagname.include?('!')
-        exclude = tagname.split('!') - [tagname.split('!').first]
-        tagname = tagname.split('!').first
-      end
+
+      verify_tagname(tagname)
+
       nodes = Node.where(status: 1, type: 'note')
                   .includes(:revision, :tag)
                   .references(:node_revisions, :term_data)
@@ -189,12 +181,8 @@ module NodeShared
 
   def self.activities_grid(body)
     body.gsub(/(?<![\>`])(\<p\>)?\[activities\:(\S+)\]/) do |_tagname|
-      tagname = Regexp.last_match(2)
-      exclude = nil
-      if tagname.include?('!')
-        exclude = tagname.split('!') - [tagname.split('!').first]
-        tagname = tagname.split('!').first
-      end
+      verify_tagname(tagname)
+
       nodes = Node.activities(tagname)
                   .order('node.cached_likes DESC')
       if exclude.present?
@@ -222,12 +210,9 @@ module NodeShared
 
   def self.upgrades_grid(body)
     body.gsub(/(?<![\>`])(\<p\>)?\[upgrades\:(\S+)\]/) do |_tagname|
-      tagname = Regexp.last_match(2)
-      exclude = nil
-      if tagname.include?('!')
-        exclude = tagname.split('!') - [tagname.split('!').first]
-        tagname = tagname.split('!').first
-      end
+
+      verify_tagname(tagname)
+
       nodes = Node.upgrades(tagname)
                   .order('node.cached_likes DESC')
       if exclude.present?
@@ -312,12 +297,7 @@ module NodeShared
   # in our interface, "users" are known as "people" because it's more human
   def self.people_grid(body, current_user = nil, _page = 1)
     body.gsub(/(?<![\>`])(\<p\>)?\[people\:(\S+)\]/) do |_tagname|
-      tagname = Regexp.last_match(2)
-      exclude = nil
-      if tagname.include?('!')
-        exclude = tagname.split('!') - [tagname.split('!').first]
-        tagname = tagname.split('!').first
-      end
+      verify_tagname(tagname)
 
       users = User.where(status: 1)
                   .includes(:user_tags)
